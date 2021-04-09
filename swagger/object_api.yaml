@@ -1,0 +1,214 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://localhost:3000
+info:
+  description: This
+  version: "1.0.0"
+  title: Object API
+  contact:
+    email: tobias.schoch@vtxmail.ch
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+tags:
+    - name: objects
+    - name: buckets
+    
+paths:
+  /object:
+    get:
+      tags:
+          - objects
+      summary: searches for objects
+      description: |
+        By passing in the appropriate options, you can search for
+        available objects in the system
+      operationId: api.objects.search
+      parameters:
+        - in: query
+          name: searchString
+          description: pass an optional search string for looking up inventory
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: skip
+          description: number of records to skip for pagination
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+        - in: query
+          name: limit
+          description: maximum number of records to return
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 50
+      responses:
+        '200':
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Object'
+        '400':
+          description: bad input parameter
+    put:
+      tags:
+        - objects
+      summary: create or update object
+      description: Adds an item to the system
+      operationId: api.objects.create_or_update
+      responses:
+        '200':
+          description: item updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Object'
+        '201':
+          description: item created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Object'
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: an existing item already exists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Object'
+        description: Inventory item to add
+  /object/{id}:
+    get:
+      tags:
+        - objects
+      summary: get an object
+      operationId: api.objects.get
+      parameters:
+        - name: id
+          in: path
+          description: Object ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Object'
+    delete:
+      tags:
+        - objects
+      summary: delets an object
+      operationId: api.objects.delete
+      parameters:
+        - name: id
+          in: path
+          description: Object ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+       '200':
+         description: object deleted
+
+  /object/{id}/rename:
+      post:
+          tags:
+              - objects
+          summary: rename object
+          operationId: api.objects.rename
+          parameters:
+              -   name: id
+                  in: path
+                  description: Object ID
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+          responses:
+              '200':
+                  description: object finalized
+  /object/{id}/finalize:
+    post:
+      tags:
+        - objects
+      summary: mark objected as completly written
+      operationId: api.objects.finalize
+      parameters:
+        - name: id
+          in: path
+          description: Object ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: object finalized
+  /buckets:
+    get:
+      tags:
+          - buckets
+      summary: searches for objects
+      description: |
+          By passing in the appropriate options, you can search for
+          available objects in the system
+      operationId: api.buckets.search
+      responses:
+          '200':
+              description: buckets
+components:
+  schemas:
+    Object:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+
+        path:
+          type: string
+          example: '/data/d290f1ee-6c54-4b01-90e6-d701748f0851.mp4'
+        mimetype:
+          type: string
+          example: 'video/mp4'
+        size:
+          type: integer
+          example: 234233342
+        date:
+          type: string
+          format: date-time
+          example: '2016-08-29T09:12:33.001Z'
+        creation:
+          type: string
+          format: date-time
+          example: '2016-08-29T09:12:33.001Z'
+        meta:
+          type: object
+          example:
+            size:
+              width: 640
+              height: 480
+            fps: 10
+            device: radarpi

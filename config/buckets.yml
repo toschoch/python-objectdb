@@ -1,0 +1,6 @@
+buckets:
+  - name: videos
+    mimetype: video/mp4
+    extension: mp4
+    filename: "{{ date }}"
+    deque:
