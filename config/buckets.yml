@@ -2,5 +2,25 @@ buckets:
   - name: videos
     mimetype: video/mp4
     extension: mp4
-    filename: "{{ date }}"
+    filename: "{{ date }}" # automatically adds _{{ id }}.{{ extension }}
+    meta:
+        radar: radar
+        device: "{{ ENVIRONMENT.DEVICE }}"
     deque:
+        maxsize:
+            absolute: 10G
+            # proportional: 1
+            # fraction: 0.3
+        # maxage:
+            #age: P1m
+            #field: date
+  - name: rdms
+    mimetype: application/octet-stream
+    extension: arrow
+    filename: "{{ date }}" # automatically adds _{{ id }}.{{ extension }}
+    meta:
+        radar: radar
+        device: "{{ ENVIRONMENT.DEVICE }}"
+    deque:
+        maxsize:
+            absolute: 10G

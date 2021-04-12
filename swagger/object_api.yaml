@@ -16,7 +16,7 @@ info:
 tags:
     - name: objects
     - name: buckets
-    
+
 paths:
   /object:
     get:
@@ -26,7 +26,6 @@ paths:
       description: |
         By passing in the appropriate options, you can search for
         available objects in the system
-      operationId: api.objects.search
       parameters:
         - in: query
           name: searchString
@@ -65,7 +64,6 @@ paths:
         - objects
       summary: create or update object
       description: Adds an item to the system
-      operationId: api.objects.create_or_update
       responses:
         '200':
           description: item updated
@@ -212,3 +210,32 @@ components:
               height: 480
             fps: 10
             device: radarpi
+    Bucket:
+      type: object
+      required:
+        - name
+        - deque
+      properties:
+        name:
+          type: string
+          example: videos
+        mimetype:
+          type: string
+          example: video/mp4
+        filename:
+          type: string
+          description: jinja2 template for the filename (gets automatically extended by {{ id }}.{{ extension }})
+          example: "{{ date }}"
+        deque:
+          type: object
+          properties:
+            maxsize:
+              type: object
+              properties:
+                absolute:
+                  type: string
+                proportional:
+                  type: string
+          example:
+            maxsize:
+              absolute: 10G
