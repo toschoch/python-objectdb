@@ -32,7 +32,10 @@ class Buckets:
 
         return buckets
 
-    def get(self) -> list[Bucket]:
+    def get(self, bucket: str) -> Bucket:
+        return self.buckets[bucket]
+
+    def get_all(self) -> List[Bucket]:
         return list(self.buckets.values())
 
     def validate_bucket(self, bucket: str):

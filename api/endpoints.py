@@ -7,8 +7,8 @@ from fastapi.exceptions import HTTPException
 from dependency_injector.wiring import inject, Provide
 
 from .container import Container
-from .services import Index, Buckets
-from .models import NewObject, Object, Bucket
+from .services import Index, Buckets, Storage
+from .models import NewObject, Object, Bucket, Status
 
 router = APIRouter()
 
@@ -17,7 +17,7 @@ router = APIRouter()
 @inject
 async def buckets_get(buckets: Buckets = Depends(Provide[Container.buckets])) -> List[Bucket]:
     """ returns all buckets configured """
-    return buckets.get()
+    return buckets.get_all()
 
 
 @router.get('/object', response_model=List[Object])
@@ -41,9 +41,11 @@ def objects_get(bucket: Optional[str] = None,
 async def object_put(obj: Union[Object, NewObject],
                      request: Request,
                      index: Index = Depends(Provide[Container.index]),
+                     storage: Storage = Depends(Provide[Container.storage]),
                      buckets: Buckets = Depends(Provide[Container.buckets])) -> Object:
     """  create or update object """
-    if isinstance(obj, NewObject):
+
+    if type(obj) == NewObject:
         buckets.validate_bucket(obj.bucket)
         if 'id' in await request.json():
             raise HTTPException(400, {
@@ -55,7 +57,15 @@ async def object_put(obj: Union[Object, NewObject],
                 "type": "type_error.uuid"
             })
 
+        bucket = buckets.get(obj.bucket)
+
+        new_obj = bucket.dict(include={'extension', 'mimetype'})
+        new_obj.update(obj.dict(exclude_unset=True))
+        obj = NewObject(**new_obj)
+
         obj = Object.new(obj)
+        storage.create(obj)
+        obj.status = Status.created
 
     index.insert_or_update(obj)
 

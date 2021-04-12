@@ -24,7 +24,7 @@ class MaxSizeDeque:
         assert self.reservations.contains(obj.id)
         assert self.storage.exists(obj)
 
-        obj = self.storage.update(obj)
+        obj = self.storage.update_info(obj)
 
         self.reservations.remove(obj.id)
         self.index.insert_or_update(obj)
