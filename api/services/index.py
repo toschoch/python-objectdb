@@ -19,6 +19,10 @@ class Index(ABC):
         pass
 
     @abstractmethod
+    def get_all(self, bucket: str = None) -> List[Object]:
+        pass
+
+    @abstractmethod
     def get(self, id: UUID) -> Object:
         pass
 
@@ -58,6 +62,12 @@ class InMemoryIndex(Index):
 
     def clear(self):
         self.db.clear()
+
+    def get_all(self, bucket: str = None) -> List[Object]:
+        if not bucket:
+            return list(self.db.values())
+
+        return list(filter(lambda o: o.bucket == bucket, self.db.values()))
 
     def get_oldest_with_size_exceeding(self, size: int) -> Tuple[int, List[Object]]:
         oldest = sorted(self.db.values(), key=lambda o: o.date, reverse=True)

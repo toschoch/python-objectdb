@@ -14,11 +14,11 @@ class Storage(ABC):
         pass
 
     @abstractmethod
-    def free(self) -> int:
+    def free_space(self) -> int:
         pass
 
     @abstractmethod
-    def update(self, obj: Object) -> Object:
+    def update_info(self, obj: Object) -> Object:
         pass
 
     @abstractmethod
@@ -31,7 +31,7 @@ class FileStorage(Storage):
     def __init__(self, base_path="/data"):
         self.base_path = Path(base_path)
 
-    def update(self, obj: Object) -> Object:
+    def update_info(self, obj: Object) -> Object:
         obj.size = os.path.getsize(obj.location)
         obj.creation = datetime.fromtimestamp(os.path.getctime(obj.location))
         if obj.date is None:
@@ -44,5 +44,5 @@ class FileStorage(Storage):
     def exists(self, obj: Object) -> bool:
         return Path(obj.location).exists()
 
-    def free(self) -> int:
+    def free_space(self) -> int:
         return shutil.disk_usage(self.base_path).free

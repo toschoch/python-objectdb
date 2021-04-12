@@ -6,9 +6,8 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
-class Object(BaseModel):
-    id: UUID = Field(..., example='d290f1ee-6c54-4b01-90e6-d701748f0851')
-    bucket: Optional[str] = Field(None, example='videos')
+class NewObject(BaseModel):
+    bucket: str = Field(..., example='videos')
     location: Optional[str] = Field(
         None, example='/data/d290f1ee-6c54-4b01-90e6-d701748f0851.mp4'
     )
@@ -22,9 +21,13 @@ class Object(BaseModel):
         example={'size': {'width': 640, 'height': 480}, 'fps': 10, 'device': 'radarpi'},
     )
 
+
+class Object(NewObject):
+    id: UUID = Field(..., example='d290f1ee-6c54-4b01-90e6-d701748f0851')
+
     @staticmethod
-    def new():
-        return Object(id=uuid.uuid4())
+    def new(new_obj: NewObject):
+        return Object(id=uuid.uuid4(), **new_obj.dict())
 
 
 class Bucket(BaseModel):

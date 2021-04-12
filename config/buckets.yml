@@ -24,3 +24,14 @@ buckets:
     deque:
         maxsize:
             absolute: 10G
+
+  - name: audios
+    mimetype: audio/mp3
+    extension: mp3
+    filename: "{{ date }}" # automatically adds _{{ id }}.{{ extension }}
+    meta:
+        radar: radar
+        device: "{{ ENVIRONMENT.DEVICE }}"
+    deque:
+        maxsize:
+            extending: true

@@ -1,17 +1,21 @@
 
 from dependency_injector import containers, providers
 
-from .services import Storage, get_buckets
+from .services import CSVIndex, Storage, Buckets
 
 
 class Container(containers.DeclarativeContainer):
 
-    buckets_config = providers.Object(
-        get_buckets
+    buckets = providers.Factory(
+        Buckets
     )
 
     storage = providers.Factory(
         Storage
+    )
+
+    index = providers.Singleton(
+        CSVIndex
     )
 
 

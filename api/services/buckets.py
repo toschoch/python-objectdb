@@ -1,26 +1,50 @@
 from typing import List
 
+from fastapi import HTTPException
 from jinja2 import Environment, BaseLoader, DebugUndefined
 import yaml
 import os
 
+from ..models import Bucket
+from .storage import Storage
 
-def get_buckets() -> List[dict]:
-    """ loads the buckets configuration from file """
 
-    with open('config/buckets.yml', 'r') as fp:
-        content = fp.read()
+class Buckets:
 
-    variables = {'ENVIRONMENT': os.environ}
+    def __init__(self):
+        self.buckets = {b['name']: Bucket(**b) for b in self.load()}
 
-    buckets = yaml.safe_load(Environment(loader=BaseLoader,
-                                         undefined=DebugUndefined)
-                             .from_string(content)
-                             .render(variables))['buckets']
+    @staticmethod
+    def load() -> List[dict]:
+        """ loads the buckets configuration from file """
 
-    validate_buckets(buckets)
+        with open('config/buckets.yml', 'r') as fp:
+            content = fp.read()
 
-    return buckets
+        variables = {'ENVIRONMENT': os.environ}
+
+        buckets = yaml.safe_load(Environment(loader=BaseLoader,
+                                             undefined=DebugUndefined)
+                                 .from_string(content)
+                                 .render(variables))['buckets']
+
+        validate_buckets(buckets)
+
+        return buckets
+
+    def get(self) -> list[Bucket]:
+        return list(self.buckets.values())
+
+    def validate_bucket(self, bucket: str):
+        if bucket not in self.buckets:
+            raise HTTPException(400, {
+                "loc": [
+                    "query",
+                    "bucket"
+                ],
+                "msg": "value is not a valid bucket name",
+                "type": "type_error.str"
+            })
 
 
 def validate_buckets(buckets: List[dict]):
@@ -28,3 +52,11 @@ def validate_buckets(buckets: List[dict]):
 
     assert all('name' in b for b in buckets)
     assert len(set(b['name'] for b in buckets)) == len(buckets)
+
+
+class Partition:
+
+    def __init__(self, buckets_config: List[Bucket], storage: Storage):
+
+        self.config = buckets_config
+        self.storage = storage

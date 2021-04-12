@@ -1,46 +1,69 @@
-
 from typing import List, Optional, Union
 from uuid import UUID
 
-from fastapi import Query
-from fastapi import APIRouter, Depends
-from pydantic import conint
+from fastapi import APIRouter, Depends, Request
+from fastapi.exceptions import HTTPException
+
 from dependency_injector.wiring import inject, Provide
-from dependency_injector.providers import Callable
 
 from .container import Container
-from .models import Object, Bucket
+from .services import Index, Buckets
+from .models import NewObject, Object, Bucket
 
 router = APIRouter()
 
 
 @router.get('/buckets', response_model=List[Bucket])
 @inject
-async def api_buckets_get(buckets_config: Callable = Depends(Provide[Container.buckets_config])) -> List[Bucket]:
+async def buckets_get(buckets: Buckets = Depends(Provide[Container.buckets])) -> List[Bucket]:
     """ returns all buckets configured """
-    return buckets_config()
+    return buckets.get()
 
 
 @router.get('/object', response_model=List[Object])
-def get_object(
-    search_string: Optional[str] = Query(None, alias='searchString'),
-    skip: Optional[conint(ge=0)] = None,
-    limit: Optional[conint(ge=0, le=50)] = None,
-) -> List[Object]:
+@inject
+def objects_get(bucket: Optional[str] = None,
+                index: Index = Depends(Provide[Container.index]),
+                buckets: Buckets = Depends(Provide[Container.buckets])) -> List[Object]:
     """
     searches for objects
     """
-    pass
+    if not bucket:
+        return index.get_all()
+
+    buckets.validate_bucket(bucket)
+
+    return index.get_all(bucket)
 
 
-@router.put('/object', response_model=Union[Object, List[Object]])
-def put_object(body: Object = None) -> Union[Object, List[Object]]:
+@router.put('/object', response_model=Object)
+@inject
+async def object_put(obj: Union[Object, NewObject],
+                     request: Request,
+                     index: Index = Depends(Provide[Container.index]),
+                     buckets: Buckets = Depends(Provide[Container.buckets])) -> Object:
     """  create or update object """
-    pass
+    if isinstance(obj, NewObject):
+        buckets.validate_bucket(obj.bucket)
+        if 'id' in await request.json():
+            raise HTTPException(400, {
+                "loc": [
+                    "body",
+                    "id"
+                ],
+                "msg": "value is not a valid object id",
+                "type": "type_error.uuid"
+            })
+
+        obj = Object.new(obj)
+
+    index.insert_or_update(obj)
+
+    return obj
 
 
 @router.get('/object/{id}', response_model=Object)
-def api_objects_get(id: UUID) -> Object:
+def object_get(id: UUID) -> Object:
     """
     get an object
     """
@@ -48,23 +71,31 @@ def api_objects_get(id: UUID) -> Object:
 
 
 @router.delete('/object/{id}', response_model=None)
-def api_objects_delete(id: UUID) -> None:
+def object_delete(id: UUID) -> None:
     """
-    delets an object
-    """
-    pass
-
-
-@router.post('/object/{id}/finalize', response_model=None)
-def api_objects_finalize(id: UUID) -> None:
-    """
-    mark objected as completly written
+    deletes an object
     """
     pass
 
 
-@router.post('/object/{id}/rename', response_model=None)
-def api_objects_rename(id: UUID) -> None:
+@router.post('/object/{id}/finalize', response_model=Object)
+def object_finalize_by_id(id: UUID) -> Object:
+    """
+    mark objected as completely written
+    """
+    pass
+
+
+@router.post('/object/finalize', response_model=Object)
+def object_finalize(obj: Object) -> Object:
+    """
+    mark objected as completely written
+    """
+    pass
+
+
+@router.post('/object/rename', response_model=Object)
+def object_rename(obj: Object) -> Object:
     """
     rename object
     """
