@@ -1,6 +1,6 @@
 import pytest
-from api.services.index import CSVIndex
-from api.models import Object
+from api.services.index import CSVIndex, Index
+from api.models import Object, NewObject
 import humanfriendly
 
 
@@ -11,16 +11,16 @@ def index():
 
 @pytest.fixture
 def example_object():
-    obj = Object.new()
+    obj = Object.new(NewObject(bucket='test'))
     obj.extension = "mp4"
     obj.size = humanfriendly.parse_size("1.23M", binary=True)
     obj.location = "data/{}.{}".format(obj.id, obj.extension)
     return obj
 
 
-def test_add_and_get(index, example_object):
+def test_add_and_get(index: Index, example_object: Object):
     assert index.total_entries() == 0
-    index.insert_or_update(example_object)
+    index.insert(example_object)
     assert index.total_entries() == 1
     obj = index.get(example_object.id)
     assert obj.location == 'data/{}.mp4'.format(obj.id)

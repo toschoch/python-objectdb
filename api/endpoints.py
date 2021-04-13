@@ -7,8 +7,8 @@ from fastapi.exceptions import HTTPException
 from dependency_injector.wiring import inject, Provide
 
 from .container import Container
-from .services import Index, Buckets, Storage
-from .models import NewObject, Object, Bucket, Status
+from .services import Index, Buckets, Storage, Logic
+from .models import NewObject, Object, Bucket
 
 router = APIRouter()
 
@@ -20,11 +20,11 @@ async def buckets_get(buckets: Buckets = Depends(Provide[Container.buckets])) ->
     return buckets.get_all()
 
 
-@router.get('/object', response_model=List[Object])
+@router.get('/objects', response_model=List[Object])
 @inject
-def objects_get(bucket: Optional[str] = None,
-                index: Index = Depends(Provide[Container.index]),
-                buckets: Buckets = Depends(Provide[Container.buckets])) -> List[Object]:
+async def objects_get(bucket: Optional[str] = None,
+                      index: Index = Depends(Provide[Container.index]),
+                      buckets: Buckets = Depends(Provide[Container.buckets])) -> List[Object]:
     """
     searches for objects
     """
@@ -36,12 +36,11 @@ def objects_get(bucket: Optional[str] = None,
     return index.get_all(bucket)
 
 
-@router.put('/object', response_model=Object)
+@router.put('/objects', response_model=Object)
 @inject
 async def object_put(obj: Union[Object, NewObject],
                      request: Request,
-                     index: Index = Depends(Provide[Container.index]),
-                     storage: Storage = Depends(Provide[Container.storage]),
+                     logic: Logic = Depends(Provide[Container.logic]),
                      buckets: Buckets = Depends(Provide[Container.buckets])) -> Object:
     """  create or update object """
 
@@ -57,55 +56,51 @@ async def object_put(obj: Union[Object, NewObject],
                 "type": "type_error.uuid"
             })
 
-        bucket = buckets.get(obj.bucket)
+        obj = logic.create_object(obj)
 
-        new_obj = bucket.dict(include={'extension', 'mimetype'})
-        new_obj.update(obj.dict(exclude_unset=True))
-        obj = NewObject(**new_obj)
-
-        obj = Object.new(obj)
-        storage.create(obj)
-        obj.status = Status.created
-
-    index.insert_or_update(obj)
+    else:
+        obj = logic.update_object(obj)
 
     return obj
 
 
-@router.get('/object/{id}', response_model=Object)
-def object_get(id: UUID) -> Object:
+@router.get('/objects/{id}', response_model=Object)
+@inject
+async def object_get(id: UUID, index: Index = Depends(Provide[Container.index])) -> Object:
     """
     get an object
     """
-    pass
+    return index.get(id)
 
 
-@router.delete('/object/{id}', response_model=None)
-def object_delete(id: UUID) -> None:
+@router.delete('/objects/{id}', response_model=None)
+async def object_delete(id: UUID,
+                        logic: Logic = Depends(Provide[Container.logic])) -> None:
     """
     deletes an object
     """
-    pass
+    logic.delete_object(id)
 
 
-@router.post('/object/{id}/finalize', response_model=Object)
-def object_finalize_by_id(id: UUID) -> Object:
+@router.post('/objects/{id}/finalize', response_model=Object)
+async def object_finalize_by_id(id: UUID) -> Object:
     """
     mark objected as completely written
     """
     pass
 
 
-@router.post('/object/finalize', response_model=Object)
-def object_finalize(obj: Object) -> Object:
+@router.post('/objects/finalize', response_model=Object)
+async def object_finalize(obj: Object,
+                          logic: Logic = Depends(Provide[Container.logic])) -> Object:
     """
     mark objected as completely written
     """
-    pass
+    return logic.finalize_object(obj)
 
 
-@router.post('/object/rename', response_model=Object)
-def object_rename(obj: Object) -> Object:
+@router.post('/objects/rename', response_model=Object)
+async def object_rename(obj: Object) -> Object:
     """
     rename object
     """

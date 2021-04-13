@@ -1,4 +1,5 @@
+from .logic import Logic
 from .index import Index, CSVIndex
 from .storage import Storage, FileStorage
-from .deque import MaxSizeDeque
+from .buffer import MaxSizeQueue
 from .buckets import Buckets

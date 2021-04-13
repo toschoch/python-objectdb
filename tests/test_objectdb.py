@@ -5,9 +5,6 @@
 import pytest
 
 
-from objectdb import objectdb
-
-
 @pytest.fixture
 def response():
     """Sample pytest fixture.

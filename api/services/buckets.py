@@ -12,7 +12,7 @@ from .storage import Storage
 class Buckets:
 
     def __init__(self):
-        self.buckets = {b['name']: Bucket(**b) for b in self.load()}
+        self._buckets = {b['name']: Bucket(**b) for b in self.load()}
 
     @staticmethod
     def load() -> List[dict]:
@@ -33,13 +33,13 @@ class Buckets:
         return buckets
 
     def get(self, bucket: str) -> Bucket:
-        return self.buckets[bucket]
+        return self._buckets[bucket]
 
     def get_all(self) -> List[Bucket]:
-        return list(self.buckets.values())
+        return list(self._buckets.values())
 
     def validate_bucket(self, bucket: str):
-        if bucket not in self.buckets:
+        if bucket not in self._buckets:
             raise HTTPException(400, {
                 "loc": [
                     "query",

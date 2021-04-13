@@ -35,7 +35,11 @@ class Index(ABC):
         pass
 
     @abstractmethod
-    def insert_or_update(self, object: Object):
+    def insert(self, object: Object):
+        pass
+
+    @abstractmethod
+    def update(self, object: Object):
         pass
 
     @abstractmethod
@@ -57,7 +61,10 @@ class InMemoryIndex(Index):
     def remove(self, id: UUID):
         del self.db[id]
 
-    def insert_or_update(self, obj: Object):
+    def insert(self, obj: Object):
+        self.db[obj.id] = obj.copy()
+
+    def update(self, obj: Object):
         self.db[obj.id] = obj.copy()
 
     def clear(self):

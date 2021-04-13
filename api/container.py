@@ -1,7 +1,7 @@
 
 from dependency_injector import containers, providers
 
-from .services import CSVIndex, FileStorage, Buckets, MaxSizeDeque
+from .services import Logic, CSVIndex, FileStorage, Buckets, MaxSizeQueue
 
 
 class Container(containers.DeclarativeContainer):
@@ -14,14 +14,20 @@ class Container(containers.DeclarativeContainer):
         FileStorage
     )
 
-    deque = providers.Factory(
-        MaxSizeDeque,
-        buckets
-
-    )
-
     index = providers.Singleton(
         CSVIndex
     )
+
+    buffer = providers.Factory(
+        MaxSizeQueue,
+        '1M', '300k', '20k',
+        index, storage
+    )
+
+    logic = providers.Factory(
+        Logic,
+        buckets, buffer, index, storage
+    )
+
 
 

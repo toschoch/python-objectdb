@@ -18,10 +18,6 @@ class Storage(ABC):
         pass
 
     @abstractmethod
-    def finalize(self, obj: Object) -> Object:
-        pass
-
-    @abstractmethod
     def free_space(self) -> int:
         pass
 
@@ -43,9 +39,6 @@ class FileStorage(Storage):
         obj.location = str(self.base_path.joinpath("{}/{}.{}".format(obj.bucket, obj.id, obj.extension)))
         obj.created = datetime.utcnow()
         return obj
-
-    def finalize(self, obj: Object) -> Object:
-        pass
 
     def update_info(self, obj: Object) -> Object:
         obj.size = os.path.getsize(obj.location)

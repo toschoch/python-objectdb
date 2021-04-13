@@ -17,10 +17,16 @@ class NewObject(BaseModel):
     date: Optional[datetime] = Field(None, example='2016-08-29T09:12:33.001Z')
     extension: Optional[str] = Field(None, example='mp4')
     mimetype: Optional[str] = Field(None, example='video/mp4')
+    filename_template: Optional[str] = Field(
+        None,
+        description='jinja2 template for the filename (gets automatically extended by {{ id }}.{{ extension }})',
+        example='{{ date }}',
+    )
     meta: Optional[Dict[str, Any]] = Field(
         None,
         example={'size': {'width': 640, 'height': 480}, 'fps': 10, 'device': 'radarpi'},
     )
+
 
 
 class Object(NewObject):
@@ -42,10 +48,17 @@ class Bucket(BaseModel):
     name: str = Field(..., example='videos')
     mimetype: Optional[str] = Field(None, example='video/mp4')
     extension: Optional[str] = Field(None, example='mp4')
-    filename: Optional[str] = Field(
+    filename_template: Optional[str] = Field(
         None,
         description='jinja2 template for the filename (gets automatically extended by {{ id }}.{{ extension }})',
         example='{{ date }}',
     )
     meta: Dict[str, Any] = Field(..., example={'device': 'radarpi'})
     deque: Dict[str, Any] = Field(..., example={'maxsize': {'absolute': '10G'}})
+
+
+def update_model(m1: BaseModel, m2: BaseModel, include) -> BaseModel:
+
+    d = m2.dict(include=include)
+    d.update(m1.dict(exclude_unset=True))
+    return type(m1)(**d)

@@ -2,7 +2,7 @@ buckets:
   - name: videos
     mimetype: video/mp4
     extension: mp4
-    filename: "{{ date }}" # automatically adds _{{ id }}.{{ extension }}
+    filename_template: "{{ date }}" # automatically adds _{{ id }}.{{ extension }}
     meta:
         radar: radar
         device: "{{ ENVIRONMENT.DEVICE }}"
@@ -17,7 +17,7 @@ buckets:
   - name: rdms
     mimetype: application/octet-stream
     extension: arrow
-    filename: "{{ date }}" # automatically adds _{{ id }}.{{ extension }}
+    filename_template: "{{ date }}" # automatically adds _{{ id }}.{{ extension }}
     meta:
         radar: radar
         device: "{{ ENVIRONMENT.DEVICE }}"
@@ -28,7 +28,7 @@ buckets:
   - name: audios
     mimetype: audio/mp3
     extension: mp3
-    filename: "{{ date }}" # automatically adds _{{ id }}.{{ extension }}
+    filename_template: "{{ date }}" # automatically adds _{{ id }}.{{ extension }}
     meta:
         radar: radar
         device: "{{ ENVIRONMENT.DEVICE }}"

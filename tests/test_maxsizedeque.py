@@ -3,9 +3,9 @@ import pytest
 
 from api.services.index import Index, InMemoryIndex
 from api.services.storage import Storage, FileStorage
-from api.services.deque import MaxSizeDeque
+from api.services.buffer import MaxSizeQueue
 
-from api.models import Object
+from api.models import Object, NewObject
 
 
 @pytest.fixture
@@ -19,12 +19,12 @@ def storage(tmpdir) -> Storage:
 
 
 def test_reserve(index, storage):
-    deque = MaxSizeDeque("1M", "450k", "10k", index, InMemoryIndex(), storage)
-    deque.reserve(Object.new())
+    deque = MaxSizeQueue("1M", "450k", "10k", index, storage)
+    deque.append(Object.new(NewObject(bucket='test')))
     assert deque.size() == humanfriendly.parse_size("450k", binary=True)
 
 
 def test_append(index, storage):
-    deque = MaxSizeDeque("1M", "450k", "10k", index, InMemoryIndex(), storage)
-    deque.reserve(Object.new())
+    deque = MaxSizeQueue("1M", "450k", "10k", index, storage)
+    deque.append(Object.new(NewObject(bucket='test')))
 
