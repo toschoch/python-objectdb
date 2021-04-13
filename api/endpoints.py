@@ -74,6 +74,7 @@ async def object_get(id: UUID, index: Index = Depends(Provide[Container.index]))
 
 
 @router.delete('/objects/{id}', response_model=None)
+@inject
 async def object_delete(id: UUID,
                         logic: Logic = Depends(Provide[Container.logic])) -> None:
     """
@@ -83,14 +84,19 @@ async def object_delete(id: UUID,
 
 
 @router.post('/objects/{id}/finalize', response_model=Object)
-async def object_finalize_by_id(id: UUID) -> Object:
+@inject
+async def object_finalize_by_id(id: UUID,
+                                index: Index = Depends(Provide[Container.index]),
+                                logic: Logic = Depends(Provide[Container.logic])) -> Object:
     """
     mark objected as completely written
     """
-    pass
+    obj = index.get(id)
+    return logic.finalize_object(obj)
 
 
 @router.post('/objects/finalize', response_model=Object)
+@inject
 async def object_finalize(obj: Object,
                           logic: Logic = Depends(Provide[Container.logic])) -> Object:
     """
@@ -100,8 +106,10 @@ async def object_finalize(obj: Object,
 
 
 @router.post('/objects/rename', response_model=Object)
-async def object_rename(obj: Object) -> Object:
+@inject
+async def object_rename(obj: Object,
+                        storage: Storage = Depends(Provide[Container.storage])) -> Object:
     """
     rename object
     """
-    pass
+    return storage.rename(obj)

@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
+
 from pathlib import Path
 import shutil
 import os
 from datetime import datetime
+from jinja2 import Environment, BaseLoader
 
 from ..models import Object
 
@@ -18,11 +20,15 @@ class Storage(ABC):
         pass
 
     @abstractmethod
+    def rename(self, obj: Object) -> Object:
+        pass
+
+    @abstractmethod
     def free_space(self) -> int:
         pass
 
     @abstractmethod
-    def update_info(self, obj: Object) -> Object:
+    def get_info(self, obj: Object) -> dict:
         pass
 
     @abstractmethod
@@ -35,17 +41,36 @@ class FileStorage(Storage):
     def __init__(self, base_path="/data"):
         self.base_path = Path(base_path)
 
+    def _default_location(self, obj: Object) -> str:
+        return str(self.base_path.joinpath("{}/{}.{}".format(obj.bucket, obj.id, obj.extension)))
+
     def create(self, obj: Object) -> Object:
-        obj.location = str(self.base_path.joinpath("{}/{}.{}".format(obj.bucket, obj.id, obj.extension)))
+        obj.location = self._default_location(obj)
         obj.created = datetime.utcnow()
         return obj
 
-    def update_info(self, obj: Object) -> Object:
-        obj.size = os.path.getsize(obj.location)
-        obj.creation = datetime.fromtimestamp(os.path.getctime(obj.location))
-        if obj.date is None:
-            obj.date = obj.creation
+    def rename(self, obj: Object) -> Object:
+        filename = Environment(loader=BaseLoader)\
+            .from_string(obj.filename_template)\
+            .render(obj.dict(exclude={'filename_template'}))
+
+        old_location = obj.location
+
+        if filename != "":
+            obj.location = str(self.base_path
+                               .joinpath("{}/{}_{}.{}".format(obj.bucket, filename, obj.id, obj.extension)))
+        else:
+            obj.location = self._default_location(obj)
+
+        if obj.location != old_location:
+            os.rename(old_location, obj.location)
         return obj
+
+    def get_info(self, obj: Object) -> dict:
+        return {
+            "size": os.path.getsize(obj.location),
+            "creation": datetime.fromtimestamp(os.path.getctime(obj.location))
+        }
 
     def delete(self, obj: Object):
         os.remove(obj.location)

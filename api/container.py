@@ -6,10 +6,6 @@ from .services import Logic, CSVIndex, FileStorage, Buckets, MaxSizeQueue
 
 class Container(containers.DeclarativeContainer):
 
-    buckets = providers.Factory(
-        Buckets
-    )
-
     storage = providers.Factory(
         FileStorage
     )
@@ -22,6 +18,12 @@ class Container(containers.DeclarativeContainer):
         MaxSizeQueue,
         '1M', '300k', '20k',
         index, storage
+    )
+
+    buckets = providers.Factory(
+        Buckets,
+        index,
+        storage
     )
 
     logic = providers.Factory(

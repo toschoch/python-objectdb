@@ -3,7 +3,7 @@ import humanfriendly
 
 from .index import Index
 from .storage import Storage
-from ..models import Object, Status
+from ..models import Object
 
 
 class CircularQueue(ABC):

@@ -28,7 +28,6 @@ class NewObject(BaseModel):
     )
 
 
-
 class Object(NewObject):
     id: UUID = Field(..., example='d290f1ee-6c54-4b01-90e6-d701748f0851')
 
@@ -44,6 +43,15 @@ class Object(NewObject):
         return Object(id=uuid.uuid4(), **new_obj.dict())
 
 
+class MaxSizeQueueConfig(BaseModel):
+    absolute: Optional[str] = Field(..., example="10G")
+    extending: bool = Field(default=False, example='false')
+
+
+class BufferConfig(BaseModel):
+    max_size: Optional[MaxSizeQueueConfig] = Field(..., example={'absolute': '10G'})
+
+
 class Bucket(BaseModel):
     name: str = Field(..., example='videos')
     mimetype: Optional[str] = Field(None, example='video/mp4')
@@ -54,11 +62,16 @@ class Bucket(BaseModel):
         example='{{ date }}',
     )
     meta: Dict[str, Any] = Field(..., example={'device': 'radarpi'})
-    deque: Dict[str, Any] = Field(..., example={'maxsize': {'absolute': '10G'}})
+    buffer: BufferConfig = Field(..., example={'maxsize': {'absolute': '10G'}})
 
 
 def update_model(m1: BaseModel, m2: BaseModel, include) -> BaseModel:
-
     d = m2.dict(include=include)
     d.update(m1.dict(exclude_unset=True))
     return type(m1)(**d)
+
+
+def update_with_dict(m: BaseModel, updated) -> BaseModel:
+    d = m.dict()
+    d.update(updated)
+    return type(m)(**d)

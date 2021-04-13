@@ -7,12 +7,16 @@ import os
 
 from ..models import Bucket
 from .storage import Storage
+from .index import Index
+from .buffer import CircularQueue, MaxSizeQueue
 
 
 class Buckets:
 
-    def __init__(self):
+    def __init__(self, index: Index, storage: Storage):
         self._buckets = {b['name']: Bucket(**b) for b in self.load()}
+        self._storage = storage
+        self._index = index
 
     @staticmethod
     def load() -> List[dict]:
@@ -31,6 +35,13 @@ class Buckets:
         validate_buckets(buckets)
 
         return buckets
+
+    def get_queue(self, bucket: str) -> CircularQueue:
+        config = self.get(bucket).buffer
+
+        if config.max_size is not None:
+            return MaxSizeQueue(config.max_size.absolute,
+                                '1M', '500k', self._index, self._storage)
 
     def get(self, bucket: str) -> Bucket:
         return self._buckets[bucket]

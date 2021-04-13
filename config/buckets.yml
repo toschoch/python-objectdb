@@ -6,8 +6,8 @@ buckets:
     meta:
         radar: radar
         device: "{{ ENVIRONMENT.DEVICE }}"
-    deque:
-        maxsize:
+    buffer:
+        max_size:
             absolute: 10G
             # proportional: 1
             # fraction: 0.3
@@ -21,8 +21,8 @@ buckets:
     meta:
         radar: radar
         device: "{{ ENVIRONMENT.DEVICE }}"
-    deque:
-        maxsize:
+    buffer:
+        max_size:
             absolute: 10G
 
   - name: audios
@@ -32,6 +32,7 @@ buckets:
     meta:
         radar: radar
         device: "{{ ENVIRONMENT.DEVICE }}"
-    deque:
-        maxsize:
+    buffer:
+        max_size:
+            absolute: 4k
             extending: true

@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from ..models import Object, NewObject, Status, update_model
+from ..models import Object, NewObject, Status, update_model, update_with_dict
 
 from .storage import Storage
 from .buckets import Buckets
@@ -20,6 +20,7 @@ class Logic:
 
         bucket = self._buckets.get(obj.bucket)
         obj = update_model(obj, bucket, {'extension', 'mimetype', 'filename_template'})
+        obj = Object.new(obj)
         self._storage.create(obj)
         obj.status = Status.created
 
@@ -31,8 +32,11 @@ class Logic:
         return obj
 
     def finalize_object(self, obj: Object) -> Object:
-
         assert self._storage.exists(obj)
+        obj = self._storage.rename(obj)
+        obj = update_with_dict(obj, self._storage.get_info(obj))
+        self._index.update(obj)
+        return obj
 
     def delete_object(self, id: UUID):
         obj = self._index.get(id)
