@@ -4,8 +4,8 @@ from pathlib import Path
 import shutil
 import os
 from datetime import datetime
-from jinja2 import Environment, BaseLoader
 
+from ..utils import PartialFormatter
 from ..models import Object
 
 
@@ -50,9 +50,8 @@ class FileStorage(Storage):
         return obj
 
     def rename(self, obj: Object) -> Object:
-        filename = Environment(loader=BaseLoader)\
-            .from_string(obj.filename_template)\
-            .render(obj.dict(exclude={'filename_template'}))
+        filename = PartialFormatter().format(obj.filename_template,
+                                             **obj.dict(exclude={'filename_template'}))
 
         old_location = obj.location
 

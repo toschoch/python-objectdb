@@ -2,10 +2,10 @@ buckets:
   - name: videos
     mimetype: video/mp4
     extension: mp4
-    filename_template: "{{ date }}" # automatically adds _{{ id }}.{{ extension }}
+    filename_template: "{ date }" # automatically adds _{ id }.{ extension }
     meta:
         radar: radar
-        device: "{{ ENVIRONMENT.DEVICE }}"
+        device: "{ ENVIRONMENT[DEVICE] }"
     buffer:
         max_size:
             absolute: 10G
@@ -17,10 +17,10 @@ buckets:
   - name: rdms
     mimetype: application/octet-stream
     extension: arrow
-    filename_template: "{{ date }}" # automatically adds _{{ id }}.{{ extension }}
+    filename_template: "{ date.strftime('%Y-%m-%d') }" # automatically adds _{{ id }}.{{ extension }}
     meta:
         radar: radar
-        device: "{{ ENVIRONMENT.DEVICE }}"
+        device: "{ ENVIRONMENT[DEVICE] }"
     buffer:
         max_size:
             absolute: 10G
@@ -28,10 +28,10 @@ buckets:
   - name: audios
     mimetype: audio/mp3
     extension: mp3
-    filename_template: "{{ date }}" # automatically adds _{{ id }}.{{ extension }}
+    filename_template: "{ date }" # automatically adds _{{ id }}.{{ extension }}
     meta:
         radar: radar
-        device: "{{ ENVIRONMENT.DEVICE }}"
+        device: "{ ENVIRONMENT[DEVICE] }"
     buffer:
         max_size:
             absolute: 4k

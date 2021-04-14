@@ -10,6 +10,8 @@ from .storage import Storage
 from .index import Index
 from .buffer import CircularQueue, MaxSizeQueue
 
+from ..utils import PartialFormatter
+
 
 class Buckets:
 
@@ -27,10 +29,9 @@ class Buckets:
 
         variables = {'ENVIRONMENT': os.environ}
 
-        buckets = yaml.safe_load(Environment(loader=BaseLoader,
-                                             undefined=DebugUndefined)
-                                 .from_string(content)
-                                 .render(variables))['buckets']
+        s = PartialFormatter().format(content, **variables)
+
+        buckets = yaml.safe_load(s)['buckets']
 
         validate_buckets(buckets)
 

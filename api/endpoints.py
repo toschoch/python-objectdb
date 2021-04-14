@@ -108,8 +108,11 @@ async def object_finalize(obj: Object,
 @router.post('/objects/rename', response_model=Object)
 @inject
 async def object_rename(obj: Object,
+                        index: Index = Depends(Provide[Container.index]),
                         storage: Storage = Depends(Provide[Container.storage])) -> Object:
     """
     rename object
     """
-    return storage.rename(obj)
+    obj = storage.rename(obj)
+    index.update(obj)
+    return obj
