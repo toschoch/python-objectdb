@@ -67,11 +67,3 @@ def validate_buckets(buckets: List[dict]):
 
     assert all('name' in b for b in buckets)
     assert len(set(b['name'] for b in buckets)) == len(buckets)
-
-
-class Partition:
-
-    def __init__(self, buckets_config: List[Bucket], storage: Storage):
-
-        self.config = buckets_config
-        self.storage = storage

@@ -47,7 +47,8 @@ class MaxSizeQueue(CircularQueue):
             self._storage.delete(obj)
 
     def excess_size(self, object_size: int = None, additional_objects: int = 1) -> int:
-        return max(0, self.size() + object_size * additional_objects + self.margin - self.max_size)
+        return max(0, self.size() + object_size * additional_objects + self.margin -
+                   min(self.max_size, self._storage.free_space()))
 
     def size(self) -> int:
         return self._index.total_size()

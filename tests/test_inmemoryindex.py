@@ -1,12 +1,12 @@
 import pytest
-from api.services.index import CSVIndex, Index
+from api.services.index import InMemoryIndex, Index
 from api.models import Object, NewObject
 import humanfriendly
 
 
 @pytest.fixture
 def index():
-    return CSVIndex()
+    return InMemoryIndex()
 
 
 @pytest.fixture
