@@ -1,13 +1,12 @@
 from typing import List
 
 from fastapi import HTTPException
-from jinja2 import Environment, BaseLoader, DebugUndefined
 import yaml
 import os
 
 from ..models import Bucket
 from .storage import Storage
-from .index import Index
+from .indices import Index
 from .buffer import CircularQueue, MaxSizeQueue
 
 from ..utils import PartialFormatter

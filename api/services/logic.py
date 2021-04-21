@@ -5,7 +5,7 @@ from ..models import Object, NewObject, Status, update_model, update_with_dict
 from .storage import Storage
 from .buckets import Buckets
 from .buffer import CircularQueue
-from .index import Index
+from .indices import Index
 
 
 class Logic:

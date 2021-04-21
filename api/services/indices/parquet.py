@@ -1,0 +1,60 @@
+import os
+from typing import List, Tuple, Union
+from uuid import UUID
+import pandas as pd
+import json
+
+from .index import Index
+from ...models import Object
+
+
+class ParquetIndex(Index):
+
+    def __init__(self, index_filename: Union[str, os.PathLike] = "index.parquet"):
+        self._index_filename = index_filename
+        self._read()
+
+    def _read(self):
+        if os.path.isfile(self._index_filename):
+            self._df = pd.read_parquet(self._index_filename).set_index('id', drop=False, inplace=True)
+        else:
+            self._df = pd.DataFrame()
+
+    def _write(self):
+        self._df.to_parquet(self._index_filename)
+
+    def total_entries(self) -> int:
+        return self._df.shape[0]
+
+    def get_oldest_with_size_exceeding(self, size: int) -> Tuple[int, List[Object]]:
+        pass
+
+    def get_all(self, bucket: str = None) -> List[Object]:
+        return list(map(lambda m: Object(**m), self._df.to_dict()))
+
+    def get(self, id: UUID) -> Object:
+        return Object(**self._df.loc[str(id)].to_dict())
+
+    def contains(self, id: UUID) -> bool:
+        return self._df.index.__contains__(str(id))
+
+    def remove(self, id: UUID):
+        self._df.drop(id)
+        self._write()
+
+    def insert(self, obj: Object):
+        assert not self.contains(obj.id)
+        obj = json.loads(obj.json())
+        self._df = self._df.append(pd.Series(obj, name=obj['id']))
+        self._write()
+
+    def update(self, obj: Object):
+        self._df.loc[str(obj.id)] = obj.dict()
+        self._write()
+
+    def clear(self):
+        self._df.drop(self._df.index)
+        self._write()
+
+    def total_size(self) -> int:
+        return self._df['size'].sum()

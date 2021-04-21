@@ -1,7 +1,7 @@
 import humanfriendly
 import pytest
 
-from api.services.index import Index, InMemoryIndex
+from api.services.indices import Index, InMemoryIndex
 from api.services.storage import Storage, FileStorage
 from api.services.buffer import MaxSizeQueue
 

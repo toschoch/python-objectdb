@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import humanfriendly
 
-from .index import Index
+from .indices import Index
 from .storage import Storage
 from ..models import Object
 

@@ -1,5 +1,5 @@
 import pytest
-from api.services.index import JsonFileIndex, Index
+from api.services.indices import JsonFileIndex, Index
 from api.models import Object, NewObject
 import humanfriendly
 
