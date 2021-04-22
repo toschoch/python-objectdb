@@ -1,7 +1,7 @@
 
 from dependency_injector import containers, providers
 
-from .services import Logic, JsonFileIndex, FileStorage, Buckets, MaxSizeQueue
+from .services import Logic, ParquetIndex, FileStorage, Buckets, MaxSizeQueue
 
 
 class Container(containers.DeclarativeContainer):
@@ -10,8 +10,9 @@ class Container(containers.DeclarativeContainer):
         FileStorage
     )
 
-    index = providers.Singleton(
-        JsonFileIndex
+    index = providers.Factory(
+        ParquetIndex,
+        ".index.parquet"
     )
 
     buffer = providers.Factory(

@@ -16,12 +16,13 @@ class ParquetIndex(Index):
 
     def _read(self):
         if os.path.isfile(self._index_filename):
-            self._df = pd.read_parquet(self._index_filename).set_index('id', drop=False, inplace=True)
+            self._df = pd.read_parquet(self._index_filename)
+            self._df.set_index('id', drop=False, inplace=True)
         else:
             self._df = pd.DataFrame()
 
     def _write(self):
-        self._df.to_parquet(self._index_filename)
+        self._df.to_parquet(self._index_filename, compression=None)
 
     def total_entries(self) -> int:
         return self._df.shape[0]
@@ -30,7 +31,7 @@ class ParquetIndex(Index):
         pass
 
     def get_all(self, bucket: str = None) -> List[Object]:
-        return list(map(lambda m: Object(**m), self._df.to_dict()))
+        return list(map(lambda m: Object(**m), self._df.to_dict('records')))
 
     def get(self, id: UUID) -> Object:
         return Object(**self._df.loc[str(id)].to_dict())
@@ -39,7 +40,7 @@ class ParquetIndex(Index):
         return self._df.index.__contains__(str(id))
 
     def remove(self, id: UUID):
-        self._df.drop(id)
+        self._df.drop(str(id), inplace=True)
         self._write()
 
     def insert(self, obj: Object):
@@ -48,13 +49,17 @@ class ParquetIndex(Index):
         self._df = self._df.append(pd.Series(obj, name=obj['id']))
         self._write()
 
-    def update(self, obj: Object):
-        self._df.loc[str(obj.id)] = obj.dict()
+    def update(self, obj: Object) -> Object:
+        old_obj = self._df.loc[str(obj.id)].to_dict()
+        obj = json.loads(obj.json())
+        old_obj.update(obj)
+        self._df.loc[old_obj['id']] = pd.Series(old_obj)
         self._write()
+        return Object(**old_obj)
 
     def clear(self):
         self._df.drop(self._df.index)
         self._write()
 
     def total_size(self) -> int:
-        return self._df['size'].sum()
+        return 0 if self._df.empty else self._df['size'].sum()

@@ -72,7 +72,7 @@ class FileStorage(Storage):
         }
 
     def delete(self, obj: Object):
-        os.remove(obj.location)
+        Path(obj.location).unlink(True)
 
     def exists(self, obj: Object) -> bool:
         return Path(obj.location).exists()

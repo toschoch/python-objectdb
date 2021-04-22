@@ -32,7 +32,8 @@ class Logic:
         return obj
 
     def finalize_object(self, obj: Object) -> Object:
-        assert self._storage.exists(obj)
+        if not self._storage.exists(obj):
+            raise FileNotFoundError()
         obj = self._storage.rename(obj)
         obj = update_with_dict(obj, self._storage.get_info(obj))
         self._index.update(obj)

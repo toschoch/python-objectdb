@@ -59,7 +59,10 @@ async def object_put(obj: Union[Object, NewObject],
         obj = logic.create_object(obj)
 
     else:
-        obj = logic.update_object(obj)
+        try:
+            obj = logic.update_object(obj)
+        except KeyError:
+            raise HTTPException(404, {"detail": "object not found"})
 
     return obj
 
@@ -70,17 +73,23 @@ async def object_get(id: UUID, index: Index = Depends(Provide[Container.index]))
     """
     get an object
     """
-    return index.get(id)
+    try:
+        return index.get(id)
+    except KeyError:
+        raise HTTPException(404, {"detail": "object not found"})
 
 
-@router.delete('/objects/{id}', response_model=None)
+@router.delete('/objects/{id}', response_model=None, status_code=204)
 @inject
 async def object_delete(id: UUID,
                         logic: Logic = Depends(Provide[Container.logic])) -> None:
     """
     deletes an object
     """
-    logic.delete_object(id)
+    try:
+        logic.delete_object(id)
+    except KeyError:
+        pass
 
 
 @router.post('/objects/{id}/finalize', response_model=Object)
@@ -91,8 +100,11 @@ async def object_finalize_by_id(id: UUID,
     """
     mark objected as completely written
     """
-    obj = index.get(id)
-    return logic.finalize_object(obj)
+    try:
+        obj = index.get(id)
+        return logic.finalize_object(obj)
+    except (KeyError, FileNotFoundError):
+        raise HTTPException(404, {"detail": "object not found"})
 
 
 @router.post('/objects/finalize', response_model=Object)
@@ -102,17 +114,9 @@ async def object_finalize(obj: Object,
     """
     mark objected as completely written
     """
-    return logic.finalize_object(obj)
+    try:
+        return logic.finalize_object(obj)
+    except (KeyError, FileNotFoundError):
+        raise HTTPException(404, {"detail": "object not found"})
 
 
-@router.post('/objects/rename', response_model=Object)
-@inject
-async def object_rename(obj: Object,
-                        index: Index = Depends(Provide[Container.index]),
-                        storage: Storage = Depends(Provide[Container.storage])) -> Object:
-    """
-    rename object
-    """
-    obj = storage.rename(obj)
-    index.update(obj)
-    return obj

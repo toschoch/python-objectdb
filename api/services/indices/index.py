@@ -39,7 +39,7 @@ class Index(ABC):
         pass
 
     @abstractmethod
-    def update(self, object: Object):
+    def update(self, object: Object) -> Object:
         pass
 
     @abstractmethod
