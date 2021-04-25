@@ -38,7 +38,7 @@ class Storage(ABC):
 
 class FileStorage(Storage):
 
-    def __init__(self, base_path="/data"):
+    def __init__(self, base_path=os.environ.get("DATA_DIRECTORY", "/data")):
         self.base_path = Path(base_path)
 
     def _default_location(self, obj: Object) -> str:

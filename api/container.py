@@ -1,4 +1,5 @@
-
+import os
+from pathlib import Path
 from dependency_injector import containers, providers
 
 from .services import Logic, ParquetIndex, FileStorage, Buckets, MaxSizeQueue
@@ -12,7 +13,8 @@ class Container(containers.DeclarativeContainer):
 
     index = providers.Factory(
         ParquetIndex,
-        ".index.parquet"
+        Path(os.environ.get("INDEX_FILE",
+                            Path(os.environ.get("DATA_DIRECTORY", "/data")).joinpath(".index.parquet")))
     )
 
     buffer = providers.Factory(

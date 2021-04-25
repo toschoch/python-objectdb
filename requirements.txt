@@ -4,4 +4,5 @@ humanfriendly
 uvicorn
 dependency_injector
 pandas
+pyyaml
 pyarrow
