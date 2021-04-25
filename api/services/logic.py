@@ -19,6 +19,8 @@ class Logic:
     def create_object(self, obj: NewObject) -> Object:
 
         bucket = self._buckets.get(obj.bucket)
+        if obj.meta is not None and bucket.meta is not None:
+            obj.meta.update(bucket.meta)
         obj = update_model(obj, bucket, {'extension', 'mimetype', 'filename_template'})
         obj = Object.new(obj)
         self._storage.create(obj)
@@ -36,6 +38,7 @@ class Logic:
             raise FileNotFoundError()
         obj = self._storage.rename(obj)
         obj = update_with_dict(obj, self._storage.get_info(obj))
+        obj.status = Status.written
         self._index.update(obj)
         return obj
 

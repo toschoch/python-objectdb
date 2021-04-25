@@ -73,5 +73,8 @@ def update_model(m1: BaseModel, m2: BaseModel, include) -> BaseModel:
 
 def update_with_dict(m: BaseModel, updated) -> BaseModel:
     d = m.dict()
+    if 'meta' in d and d['meta'] is not None and 'meta' in updated and updated['meta'] is not None:
+        d['meta'].update(updated['meta'])
+        updated['meta'] = d['meta']
     d.update(updated)
     return type(m)(**d)
