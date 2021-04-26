@@ -46,6 +46,8 @@ class FileStorage(Storage):
 
     def create(self, obj: Object) -> Object:
         obj.location = self._default_location(obj)
+        path = Path(obj.location)
+        path.parent.mkdir(parents=True, exist_ok=True)
         obj.created = datetime.utcnow()
         return obj
 

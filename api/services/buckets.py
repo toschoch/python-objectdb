@@ -3,6 +3,7 @@ from typing import List
 from fastapi import HTTPException
 import yaml
 import os
+from pathlib import Path
 
 from ..models import Bucket
 from .storage import Storage
@@ -23,7 +24,7 @@ class Buckets:
     def load() -> List[dict]:
         """ loads the buckets configuration from file """
 
-        with open('config/buckets.yml', 'r') as fp:
+        with open(Path(os.environ.get('BUCKETS_CONFIG', 'config/buckets.yml')), 'r') as fp:
             content = fp.read()
 
         variables = {'ENVIRONMENT': os.environ}

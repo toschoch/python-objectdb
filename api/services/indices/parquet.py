@@ -16,13 +16,15 @@ class ParquetIndex(Index):
 
     def _read(self):
         if os.path.isfile(self._index_filename):
-            self._df = pd.read_parquet(self._index_filename)
-            self._df.set_index('id', drop=False, inplace=True)
+            self._df = pd.read_pickle(self._index_filename)
+            # self._df = pd.read_parquet(self._index_filename)
+            # self._df.set_index('id', drop=False, inplace=True)
         else:
             self._df = pd.DataFrame()
 
     def _write(self):
-        self._df.to_parquet(self._index_filename, compression=None)
+        #self._df.to_parquet(self._index_filename, compression=None)
+        self._df.to_pickle(self._index_filename)
 
     def total_entries(self) -> int:
         return self._df.shape[0]
