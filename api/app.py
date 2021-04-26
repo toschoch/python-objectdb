@@ -10,7 +10,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         description='This',
         version='1.0.0',
-        title='Object API',
+        title='Storage API',
         contact={'email': 'tobias.schoch@vtxmail.ch'},
         license={
             'name': 'Apache 2.0',

@@ -13,14 +13,14 @@ from .models import NewObject, Object, Bucket
 router = APIRouter()
 
 
-@router.get('/buckets', response_model=List[Bucket])
+@router.get('/buckets', response_model=List[Bucket], tags=['Buckets'])
 @inject
 async def buckets_get(buckets: Buckets = Depends(Provide[Container.buckets])) -> List[Bucket]:
     """ returns all buckets configured """
     return buckets.get_all()
 
 
-@router.get('/objects', response_model=List[Object])
+@router.get('/objects', response_model=List[Object], tags=['Objects'])
 @inject
 async def objects_get(bucket: Optional[str] = None,
                       index: Index = Depends(Provide[Container.index]),
@@ -36,7 +36,7 @@ async def objects_get(bucket: Optional[str] = None,
     return index.get_all(bucket)
 
 
-@router.put('/objects', response_model=Object)
+@router.put('/objects', response_model=Object, tags=['Objects'])
 @inject
 async def object_put(obj: Union[Object, NewObject],
                      request: Request,
@@ -67,7 +67,7 @@ async def object_put(obj: Union[Object, NewObject],
     return obj
 
 
-@router.get('/objects/{id}', response_model=Object)
+@router.get('/objects/{id}', response_model=Object, tags=['Objects'])
 @inject
 async def object_get(id: UUID, index: Index = Depends(Provide[Container.index])) -> Object:
     """
@@ -79,7 +79,7 @@ async def object_get(id: UUID, index: Index = Depends(Provide[Container.index]))
         raise HTTPException(404, {"detail": "object not found"})
 
 
-@router.delete('/objects/{id}', response_model=None, status_code=204)
+@router.delete('/objects/{id}', response_model=None, status_code=204, tags=['Objects'])
 @inject
 async def object_delete(id: UUID,
                         logic: Logic = Depends(Provide[Container.logic])) -> None:
@@ -92,7 +92,7 @@ async def object_delete(id: UUID,
         pass
 
 
-@router.post('/objects/{id}/finalize', response_model=Object)
+@router.post('/objects/{id}/finalize', response_model=Object, tags=['Objects'])
 @inject
 async def object_finalize_by_id(id: UUID,
                                 index: Index = Depends(Provide[Container.index]),
@@ -107,7 +107,7 @@ async def object_finalize_by_id(id: UUID,
         raise HTTPException(404, {"detail": "object not found"})
 
 
-@router.post('/objects/finalize', response_model=Object)
+@router.post('/objects/finalize', response_model=Object, tags=['Objects'])
 @inject
 async def object_finalize(obj: Object,
                           logic: Logic = Depends(Provide[Container.logic])) -> Object:
