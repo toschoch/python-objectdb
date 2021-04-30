@@ -2,7 +2,7 @@ from uuid import UUID
 from typing import List, Tuple
 
 from .index import Index
-from ...models import Object
+from ...models import Object, update_with_dict
 
 
 class InMemoryIndex(Index):
@@ -22,8 +22,13 @@ class InMemoryIndex(Index):
     def insert(self, obj: Object):
         self.db[obj.id] = obj.copy()
 
-    def update(self, obj: Object):
-        self.db[obj.id] = obj.copy()
+    def update(self, obj: Object) -> Object:
+        if obj.id in self.db:
+            old = self.db[obj.id]
+            self.db[obj.id] = update_with_dict(old, obj.dict(exclude_none=True))
+        else:
+            self.db[obj.id] = obj.copy()
+        return self.db[obj.id]
 
     def clear(self):
         self.db.clear()

@@ -10,7 +10,7 @@ def index():
 
 
 @pytest.fixture
-def example_object():
+def example_object(tmp_path):
     obj = Object.new(NewObject(bucket='test'))
     obj.extension = "mp4"
     obj.size = humanfriendly.parse_size("1.23M", binary=True)

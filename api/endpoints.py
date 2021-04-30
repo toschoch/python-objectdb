@@ -8,7 +8,7 @@ from dependency_injector.wiring import inject, Provide
 
 from .container import Container
 from .services import Index, Buckets, Storage, Logic
-from .models import NewObject, Object, Bucket
+from .models import NewObject, ObjectUpdate, Object, Bucket
 
 router = APIRouter()
 
@@ -38,7 +38,7 @@ async def objects_get(bucket: Optional[str] = None,
 
 @router.put('/objects', response_model=Object, tags=['Objects'])
 @inject
-async def object_put(obj: Union[Object, NewObject],
+async def object_put(obj: Union[NewObject, ObjectUpdate],
                      request: Request,
                      logic: Logic = Depends(Provide[Container.logic]),
                      buckets: Buckets = Depends(Provide[Container.buckets])) -> Object:
@@ -109,7 +109,7 @@ async def object_finalize_by_id(id: UUID,
 
 @router.post('/objects/finalize', response_model=Object, tags=['Objects'])
 @inject
-async def object_finalize(obj: Object,
+async def object_finalize(obj: ObjectUpdate,
                           logic: Logic = Depends(Provide[Container.logic])) -> Object:
     """
     mark objected as completely written

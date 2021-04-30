@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from dependency_injector import containers, providers
 
-from .services import Logic, ParquetIndex, FileStorage, Buckets, MaxSizeQueue
+from .services import Logic, FeatherIndex, FileStorage, Buckets, MaxSizeQueue
 
 
 class Container(containers.DeclarativeContainer):
@@ -12,7 +12,7 @@ class Container(containers.DeclarativeContainer):
     )
 
     index = providers.Factory(
-        ParquetIndex,
+        FeatherIndex,
         Path(os.environ.get("INDEX_FILE",
                             Path(os.environ.get("DATA_DIRECTORY", "/data")).joinpath(".index.parquet")))
     )

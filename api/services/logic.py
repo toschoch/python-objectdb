@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from ..models import Object, NewObject, Status, update_model, update_with_dict
+from ..models import Object, ObjectUpdate, NewObject, Status, update_model, update_with_dict
 
 from .storage import Storage
 from .buckets import Buckets
@@ -24,20 +24,27 @@ class Logic:
         obj = update_model(obj, bucket, {'extension', 'mimetype', 'filename_template'})
         obj = Object.new(obj)
         self._storage.create(obj)
+
+        if obj.date is None:
+            obj.date = obj.created
+
         obj.status = Status.created
 
         self._buffer.append(obj)
         return obj
 
-    def update_object(self, obj: Object) -> Object:
-        self._index.update(obj)
-        return obj
+    def update_object(self, obj: ObjectUpdate) -> Object:
+        return self._index.update(obj)
 
-    def finalize_object(self, obj: Object) -> Object:
+    def finalize_object(self, obj_update: ObjectUpdate) -> Object:
+        obj = self._index.get(obj_update.id)
         if not self._storage.exists(obj):
             raise FileNotFoundError()
+
         obj = self._storage.rename(obj)
+        obj = update_with_dict(obj, obj_update.dict(exclude_none=True))
         obj = update_with_dict(obj, self._storage.get_info(obj))
+        assert obj.date is not None
         obj.status = Status.written
         self._index.update(obj)
         return obj

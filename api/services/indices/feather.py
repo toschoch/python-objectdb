@@ -8,29 +8,31 @@ from .index import Index
 from ...models import Object
 
 
-class ParquetIndex(Index):
+class FeatherIndex(Index):
 
-    def __init__(self, index_filename: Union[str, os.PathLike] = "index.parquet"):
+    def __init__(self, index_filename: Union[str, os.PathLike] = "index.feather"):
         self._index_filename = index_filename
         self._read()
 
     def _read(self):
         if os.path.isfile(self._index_filename):
-            self._df = pd.read_pickle(self._index_filename)
-            # self._df = pd.read_parquet(self._index_filename)
-            # self._df.set_index('id', drop=False, inplace=True)
+            # self._df = pd.read_pickle(self._index_filename)
+            self._df = pd.read_feather(self._index_filename)
+            self._df.set_index('id', drop=False, inplace=True)
         else:
             self._df = pd.DataFrame()
 
     def _write(self):
-        #self._df.to_parquet(self._index_filename, compression=None)
-        self._df.to_pickle(self._index_filename)
+        self._df.reset_index(drop=True).to_feather(self._index_filename, compression=None)
+        #self._df.to_pickle(self._index_filename)
 
     def total_entries(self) -> int:
         return self._df.shape[0]
 
     def get_oldest_with_size_exceeding(self, size: int) -> Tuple[int, List[Object]]:
-        pass
+        sorted_index = self._df.sort_values('date', ascending=False)
+        sorted_index = sorted_index[sorted_index['size'].cumsum() >= size]
+        return sorted_index['size'].sum(), list(map(lambda m: Object(**m), sorted_index.to_dict('records')))
 
     def get_all(self, bucket: str = None) -> List[Object]:
         return list(map(lambda m: Object(**m), self._df.to_dict('records')))
