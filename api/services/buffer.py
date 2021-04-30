@@ -38,7 +38,8 @@ class MaxSizeQueue(CircularQueue):
         excess_size = self.excess_size(size)
         if excess_size > 0:
             self.free(excess_size)
-        assert self.excess_size(size) == 0
+        if self._storage.free_space() < size or self.excess_size(size) > 0:
+            raise IOError("No space")
 
     def free(self, size: int):
         additional_bytes, to_remove = self._index.get_oldest_with_size_exceeding(size)

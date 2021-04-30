@@ -56,7 +56,10 @@ async def object_put(obj: Union[NewObject, ObjectUpdate],
                 "type": "type_error.uuid"
             })
 
-        obj = logic.create_object(obj)
+        try:
+            obj = logic.create_object(obj)
+        except IOError as err:
+            raise HTTPException(507, {"detail": str(err)})
 
     else:
         try:

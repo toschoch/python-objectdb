@@ -30,7 +30,7 @@ def buckets_config_file(tmp_path):
                 'meta': {
                     'system': 'test'
                 },
-                'buffer': {
+                'storage': {
                     'max_size': {
                         'absolute': '10G'
                     }

@@ -8,21 +8,20 @@ from .index import Index
 from ...models import Object
 
 
-class FeatherIndex(Index):
+class PickleIndex(Index):
 
-    def __init__(self, index_filename: Union[str, os.PathLike] = "index.feather"):
+    def __init__(self, index_filename: Union[str, os.PathLike] = "index.pickle"):
         self._index_filename = index_filename
         self._read()
 
     def _read(self):
         if os.path.isfile(self._index_filename):
-            self._df = pd.read_feather(self._index_filename)
-            self._df.set_index('id', drop=False, inplace=True)
+            self._df = pd.read_pickle(self._index_filename)
         else:
             self._df = pd.DataFrame()
 
     def _write(self):
-        self._df.reset_index(drop=True).to_feather(self._index_filename, compression=None)
+        self._df.to_pickle(self._index_filename)
 
     def total_entries(self) -> int:
         return self._df.shape[0]

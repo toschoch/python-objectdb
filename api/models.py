@@ -57,8 +57,10 @@ class MaxSizeQueueConfig(BaseModel):
     extending: bool = Field(default=False, example='false')
 
 
-class BufferConfig(BaseModel):
+class StorageConfig(BaseModel):
     max_size: Optional[MaxSizeQueueConfig] = Field(..., example={'absolute': '10G'})
+    usual_object_size: str = Field('1M', example='1.4M')
+    margin_size: str = Field('100M', example='1G')
 
 
 class Bucket(BaseModel):
@@ -67,11 +69,11 @@ class Bucket(BaseModel):
     extension: Optional[str] = Field(None, example='mp4')
     filename_template: Optional[str] = Field(
         None,
-        description='jinja2 template for the filename (gets automatically extended by {{ id }}.{{ extension }})',
+        description='template for the filename (gets automatically extended by { id }.{ extension })',
         example='{{ date }}',
     )
     meta: Dict[str, Any] = Field(..., example={'device': 'radarpi'})
-    buffer: BufferConfig = Field(..., example={'maxsize': {'absolute': '10G'}})
+    storage: StorageConfig = Field(..., example={'maxsize': {'absolute': '10G'}})
 
 
 def update_model(m1: BaseModel, m2: BaseModel, include) -> BaseModel:

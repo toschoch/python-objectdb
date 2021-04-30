@@ -6,12 +6,12 @@ buckets:
     meta:
         radar: radar
         device: "{ ENVIRONMENT[DEVICE] }"
-    buffer:
+    storage:
         max_size:
             absolute: 10G
             # proportional: 1
             # fraction: 0.3
-        # maxage:
+        # max_age:
             #age: P1m
             #field: date
   - name: rdms
@@ -21,7 +21,7 @@ buckets:
     meta:
         radar: radar
         device: "{ ENVIRONMENT[DEVICE] }"
-    buffer:
+    storage:
         max_size:
             absolute: 10G
 
@@ -32,7 +32,7 @@ buckets:
     meta:
         radar: radar
         device: "{ ENVIRONMENT[DEVICE] }"
-    buffer:
+    storage:
         max_size:
             absolute: 4k
             extending: true

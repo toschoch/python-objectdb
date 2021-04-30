@@ -38,11 +38,12 @@ class Buckets:
         return buckets
 
     def get_queue(self, bucket: str) -> CircularQueue:
-        config = self.get(bucket).buffer
+        config = self.get(bucket).storage
 
         if config.max_size is not None:
             return MaxSizeQueue(config.max_size.absolute,
-                                '1M', '500k', self._index, self._storage)
+                                config.usual_object_size, config.margin_size,
+                                self._index, self._storage)
 
     def get(self, bucket: str) -> Bucket:
         return self._buckets[bucket]

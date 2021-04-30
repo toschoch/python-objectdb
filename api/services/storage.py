@@ -71,7 +71,7 @@ class FileStorage(Storage):
     def get_info(self, obj: Object) -> dict:
         return {
             "size": os.path.getsize(obj.location),
-            "creation": datetime.fromtimestamp(os.path.getctime(obj.location))
+            "created": datetime.fromtimestamp(os.path.getctime(obj.location))
         }
 
     def delete(self, obj: Object):
