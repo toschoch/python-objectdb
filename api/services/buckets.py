@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from fastapi import HTTPException
 import yaml
@@ -37,13 +37,17 @@ class Buckets:
 
         return buckets
 
-    def get_queue(self, bucket: str) -> CircularQueue:
-        config = self.get(bucket).storage
+    def get_queue(self, bucket: Union[Bucket, str]) -> CircularQueue:
+        if isinstance(bucket, str):
+            config = self.get(bucket).storage
+        else:
+            config = bucket.storage
 
         if config.max_size is not None:
             return MaxSizeQueue(config.max_size.absolute,
                                 config.usual_object_size, config.margin_size,
                                 self._index, self._storage)
+        raise NotImplementedError("Not yet implemented!")
 
     def get(self, bucket: str) -> Bucket:
         return self._buckets[bucket]

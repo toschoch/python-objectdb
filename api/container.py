@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from dependency_injector import containers, providers
 
-from .services import Logic, PickleIndex, FileStorage, Buckets, MaxSizeQueue
+from .services import Logic, PickleIndex, FeatherIndex, FileStorage, Buckets, MaxSizeQueue
 
 
 class Container(containers.DeclarativeContainer):
@@ -17,12 +17,6 @@ class Container(containers.DeclarativeContainer):
                             Path(os.environ.get("DATA_DIRECTORY", "/data")).joinpath("index.pickle")))
     )
 
-    buffer = providers.Factory(
-        MaxSizeQueue,
-        '1M', '300k', '20k',
-        index, storage
-    )
-
     buckets = providers.Factory(
         Buckets,
         index,
@@ -31,7 +25,7 @@ class Container(containers.DeclarativeContainer):
 
     logic = providers.Factory(
         Logic,
-        buckets, buffer, index, storage
+        buckets, index, storage
     )
 
 
