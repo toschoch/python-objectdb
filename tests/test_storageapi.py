@@ -31,8 +31,10 @@ def buckets_config_file(tmp_path):
                     'system': 'test'
                 },
                 'storage': {
+                    'usual_object_size': '100k',
+                    'margin_size': '1M',
                     'max_size': {
-                        'absolute': '10G'
+                        'absolute': '2M'
                     }
                 }
 

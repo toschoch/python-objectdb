@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from ..models import Object, ObjectUpdate, NewObject, Status, update_model, update_with_dict
+from ..models import Object, ObjectUpdate, NewObject, NewObjectToStore, Status, update_model, update_with_dict
 
 from .storage import Storage
 from .buckets import Buckets
@@ -21,7 +21,7 @@ class Logic:
         if obj.meta is not None and bucket.meta is not None:
             obj.meta.update(bucket.meta)
         obj = update_model(obj, bucket, {'extension', 'mimetype', 'filename_template'})
-        obj = Object.new(obj)
+        obj = NewObjectToStore.new(obj)
         self._storage.create(obj)
 
         if obj.date is None:
@@ -42,10 +42,13 @@ class Logic:
 
         obj = self._storage.rename(obj)
         obj = update_with_dict(obj, obj_update.dict(exclude_none=True))
-        obj = update_with_dict(obj, self._storage.get_info(obj))
+        obj = self._storage.update_info(obj)
+
         assert obj.date is not None
+
         obj.status = Status.written
         self._index.update(obj)
+
         return obj
 
     def delete_object(self, id: UUID):

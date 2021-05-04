@@ -1,13 +1,12 @@
 from abc import ABC, abstractmethod
 
-from typing import List
 from pathlib import Path
 import shutil
 import os
 from datetime import datetime
 
 from ..utils import PartialFormatter
-from ..models import Object
+from ..models import Object, NewObjectToStore
 
 
 class Storage(ABC):
@@ -17,7 +16,7 @@ class Storage(ABC):
         pass
 
     @abstractmethod
-    def create(self, obj: Object) -> Object:
+    def create(self, obj: NewObjectToStore) -> Object:
         pass
 
     @abstractmethod
@@ -29,7 +28,7 @@ class Storage(ABC):
         pass
 
     @abstractmethod
-    def get_info(self, obj: Object) -> dict:
+    def update_info(self, obj: Object) -> Object:
         pass
 
     @abstractmethod
@@ -45,11 +44,14 @@ class FileStorage(Storage):
     def _default_location(self, obj: Object) -> str:
         return str(self.base_path.joinpath("{}/{}.{}".format(obj.bucket, obj.id, obj.extension)))
 
-    def create(self, obj: Object) -> Object:
-        obj.location = self._default_location(obj)
+    def create(self, obj: NewObjectToStore) -> Object:
+
+        obj = Object(location=self._default_location(obj),
+                     created=datetime.utcnow(),
+                     **obj.dict())
+
         path = Path(obj.location)
         path.parent.mkdir(parents=True, exist_ok=True)
-        obj.created = datetime.utcnow()
         return obj
 
     def rename(self, obj: Object) -> Object:
@@ -68,14 +70,15 @@ class FileStorage(Storage):
             os.rename(old_location, obj.location)
         return obj
 
-    def get_info(self, obj: Object) -> dict:
-        return {
-            "size": os.path.getsize(obj.location),
-            "created": datetime.fromtimestamp(os.path.getctime(obj.location))
-        }
+    def update_info(self, obj: Object) -> dict:
+        obj.size = os.path.getsize(obj.location)
+        obj.created = datetime.fromtimestamp(os.path.getctime(obj.location))
+        return obj
 
     def delete(self, obj: Object):
-        Path(obj.location).unlink(True)
+        p = Path(obj.location)
+        if p.exists():
+            p.unlink()
 
     def exists(self, obj: Object) -> bool:
         return Path(obj.location).exists()

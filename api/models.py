@@ -32,20 +32,24 @@ class NewObject(ObjectMutable):
     bucket: str = Field(..., example='videos')
 
 
-class Object(NewObject):
+class NewObjectToStore(NewObject):
     id: UUID = Field(..., example='d290f1ee-6c54-4b01-90e6-d701748f0851')
     status: Status = Field(..., example='created')
-    location: Optional[str] = Field(
-        None, example='/data/d290f1ee-6c54-4b01-90e6-d701748f0851.mp4'
-    )
-    created: datetime = Field(..., example='2016-08-29T09:12:33.001Z')
+    extension: str = Field(..., example='mp4')
 
     @staticmethod
     def new(new_obj: NewObject):
-        return Object(id=uuid.uuid4(),
-                      status=Status.created,
-                      created=datetime.utcnow(),
-                      **new_obj.dict())
+        return NewObjectToStore(id=uuid.uuid4(),
+                                status=Status.created,
+                                created=datetime.utcnow(),
+                                **new_obj.dict(exclude_unset=True))
+
+
+class Object(NewObjectToStore):
+    location: str = Field(
+        None, example='/data/d290f1ee-6c54-4b01-90e6-d701748f0851.mp4'
+    )
+    created: datetime = Field(..., example='2016-08-29T09:12:33.001Z')
 
 
 class ObjectUpdate(ObjectMutable):
