@@ -1,6 +1,9 @@
+import datetime
+import uuid
+
 import pytest
 from api.services.indices import InMemoryIndex, Index
-from api.models import Object, NewObject
+from api.models import Object, Status
 import humanfriendly
 
 
@@ -10,12 +13,24 @@ def index():
 
 
 @pytest.fixture
-def example_object(tmp_path):
-    obj = Object.new(NewObject(bucket='test'))
-    obj.extension = "mp4"
-    obj.size = humanfriendly.parse_size("1.23M", binary=True)
-    obj.location = "data/{}.{}".format(obj.id, obj.extension)
-    return obj
+def object_factory(tmp_path):
+    def create_new_obj():
+        new_id = uuid.uuid4()
+        ext = "mp4"
+        obj = Object(id=new_id, extension=ext,
+                     bucket='test',
+                     status=Status.created,
+                     created=datetime.datetime.utcnow(),
+                     size=humanfriendly.parse_size("1.23M", binary=True),
+                     location="data/{}.{}".format(new_id, ext))
+        return obj
+
+    return create_new_obj
+
+
+@pytest.fixture
+def example_object(object_factory):
+    return object_factory()
 
 
 def test_add_and_get(index: Index, example_object: Object):
@@ -28,5 +43,3 @@ def test_add_and_get(index: Index, example_object: Object):
     size, oldest = index.get_oldest_with_size_exceeding(100)
     assert oldest[0].id == obj.id
     assert size == 1289748
-
-

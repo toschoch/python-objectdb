@@ -4,7 +4,7 @@ import uuid
 import pytest
 from api.services.indices import FeatherIndex, Index
 from api.models import Object, NewObject
-from .test_inmemoryindex import example_object
+from .test_inmemoryindex import example_object, object_factory
 
 
 @pytest.fixture

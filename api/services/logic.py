@@ -22,7 +22,7 @@ class Logic:
             obj.meta.update(bucket.meta)
         obj = update_model(obj, bucket, {'extension', 'mimetype', 'filename_template'})
         obj = NewObjectToStore.new(obj)
-        self._storage.create(obj)
+        obj = self._storage.create(obj)
 
         if obj.date is None:
             obj.date = obj.created
