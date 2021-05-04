@@ -24,11 +24,11 @@ class Client:
 
     def create(self, bucket, **kwargs) -> Object:
         new_obj = NewObject(bucket=bucket, **kwargs)
-        r = requests.put(self.base_url + '/objects', json=new_obj.json(exclude_unset=True))
+        r = requests.put(self.base_url + '/objects', data=new_obj.json(exclude_unset=True).encode())
         r.raise_for_status()
         return Object(**r.json())
 
     def finalize(self, obj: Object) -> Object:
-        r = requests.post(self.base_url + '/objects/finalize', json=obj.json(exclude_unset=True))
+        r = requests.post(self.base_url + '/objects/finalize', data=obj.json(exclude_unset=True).encode())
         r.raise_for_status()
         return Object(**r.json())
