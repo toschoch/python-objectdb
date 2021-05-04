@@ -1,19 +1,6 @@
 ===============
-Python ObjectDB
+Python StorageAPI
 ===============
-
-
-.. image:: https://img.shields.io/pypi/v/objectdb.svg
-        :target: https://pypi.python.org/pypi/objectdb
-
-.. image:: https://img.shields.io/travis/toschoch/objectdb.svg
-        :target: https://travis-ci.com/toschoch/objectdb
-
-.. image:: https://readthedocs.org/projects/objectdb/badge/?version=latest
-        :target: https://objectdb.readthedocs.io/en/latest/?version=latest
-        :alt: Documentation Status
-
-
 
 
 Small module that helps to build and mantain file objects on an shared disk/directory and sends events (crud) through MQTT
